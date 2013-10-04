@@ -16,21 +16,10 @@
 
 #
 
-SUBDIRS = . bin lib share
+SUBDIRS = . bin lib
 
-EXTRA_DIST = \
-	etc/spsid_siteconfig.pl
+EXTRA_DIST = 
 
-
-siteconf_s = etc/spsid_siteconfig.pl
-siteconf_d = @siteconfdir@
-siteconf_df = $(siteconf_d)/spsid_siteconfig.pl
-
-install-data-local:
-	$(mkinstalldirs) $(DESTDIR)$(plugconfdir)
-	if test ! -e $(siteconf_df); then \
-	  $(mkinstalldirs) $(DESTDIR)$(siteconf_d); \
-	  $(INSTALL_DATA) $(siteconf_s) $(DESTDIR)$(siteconf_df); fi
 
 dist-hook:
 	date >DIST_REVISION
@@ -38,5 +27,3 @@ dist-hook:
 	cp DIST_REVISION $(distdir)/
 
 
-test: all
-	SPSID_TOP=@abs_top_builddir@ PERL=$(PERL) $(SHELL) t/run_tests.sh
