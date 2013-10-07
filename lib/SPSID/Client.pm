@@ -331,6 +331,14 @@ sub ping
 {
     my $self = shift;
 
+    my $v = $self->_call('server_version');
+    die('Server did not return its version')
+        unless (defined($v) and $v > 0);
+
+    if( $v < 1.0 ) {
+        die('Server version is incompatible with the client');
+    }
+    
     my $r = $self->_call('ping', {'echo' => 'blahblah'});
     die('Ping RPC call returned wrong response')
         unless ($r->{'echo'} eq 'blahblah');
