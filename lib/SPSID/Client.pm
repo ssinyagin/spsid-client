@@ -310,6 +310,13 @@ sub new_object_default_attrs
 }
 
 
+sub recursive_md5
+{
+    my $self = shift;
+    my $id = shift;
+    return $self->_call('recursive_md5', {'id' => $id});
+}
+
 sub get_siam_root
 {
     my $self = shift;
