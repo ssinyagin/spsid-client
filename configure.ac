@@ -55,7 +55,7 @@ AC_SUBST(perllibdirs, [${perllibdirs}])
 if test "$enable_pkgonly" != yes; then
 
    for module in \
-      'JSON' 'Moose' 'LWP::UserAgent' 'Try::Tiny' 'YAML'
+      'JSON' 'Moose' 'LWP::UserAgent' 'Try::Tiny' 'YAML' 'CHI'
    do
      AC_MSG_CHECKING([presence of $module])
      if ${PERL} ${PERLOPTS} -e 'use '$module 2>/dev/null; then
