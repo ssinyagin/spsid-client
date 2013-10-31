@@ -88,7 +88,15 @@ sub sync_contained_objects
         ('spsid.object.id' => 1,
          'spsid.object.class' => 1,
          'spsid.object.container' => 1);
-    
+
+    foreach my $attr_name (keys %{$attr_schema}) {
+        if( $attr_schema->{$attr_name}{'calculated'} or
+            $attr_schema->{$attr_name}{'sync_ignore'} )
+        {
+            $ignore_attr{$attr_name} = 1;
+        }
+    }
+
     # Find objects for adding or modifying
 
     while( my ($key, $sync_obj) = each %sync_uniqref )
