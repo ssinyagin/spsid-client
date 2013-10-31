@@ -175,6 +175,7 @@ Does nothing.
 sub disconnect
 {
     my $self = shift;
+    $self->{'cache'}->clear();
     return;
 }
 
