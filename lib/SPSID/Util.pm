@@ -32,8 +32,15 @@ sub sync_contained_objects
     my @unique_mandatory_attr;
     
     foreach my $attr_name (keys %{$attr_schema}) {
-        if( $attr_schema->{$attr_name}{'unique'} and
-            $attr_schema->{$attr_name}{'mandatory'} )
+        if( $attr_schema->{$attr_name}{'mandatory'}
+            and
+            (
+             $attr_schema->{$attr_name}{'unique'}
+             or
+             $attr_schema->{$attr_name}{'unique_child'}
+            )
+            and
+            not $attr_schema->{$attr_name}{'default_autogen'} )
         {
             push(@unique_mandatory_attr, $attr_name);
         }
@@ -89,14 +96,21 @@ sub sync_contained_objects
          'spsid.object.class' => 1,
          'spsid.object.container' => 1);
 
+    my %def_auto_attr;
+
     foreach my $attr_name (keys %{$attr_schema}) {
         if( $attr_schema->{$attr_name}{'calculated'} or
             $attr_schema->{$attr_name}{'sync_ignore'} )
         {
             $ignore_attr{$attr_name} = 1;
         }
-    }
 
+        if( $attr_schema->{$attr_name}{'default_autogen'} )
+        {
+            $def_auto_attr{$attr_name} = 1;
+        }
+    }
+    
     # Find objects for adding or modifying
 
     while( my ($key, $sync_obj) = each %sync_uniqref )
@@ -104,13 +118,20 @@ sub sync_contained_objects
         my $db_obj = $db_uniqref{$key};
         if( defined($db_obj) )
         {
-            # check if the database object is to be modified
+            # check if the database object is to be modified or deleted
+            # default_autogen attributes cannot be deleted, but
+            # can be overwritten
+            
             my $mod_obj = {};
             foreach my $attr_name (keys %{$db_obj}) {
-                if( not $ignore_attr{$attr_name} ) {
-                    if( not defined($sync_obj->{$attr_name}) ) {
-                        # deleted attribute
-                        $mod_obj->{$attr_name} = undef;
+                if( not $ignore_attr{$attr_name} )
+                {
+                    if( not defined($sync_obj->{$attr_name}) )
+                    {
+                        if( not $def_auto_attr{$attr_name} ) {
+                            # deleted attribute
+                            $mod_obj->{$attr_name} = undef;
+                        }
                     }
                     elsif( $sync_obj->{$attr_name} ne $db_obj->{$attr_name} ) {
                         # modified attribute
@@ -119,6 +140,8 @@ sub sync_contained_objects
                 }
             }
 
+            # check if attributes need to be added
+            
             foreach my $attr_name (keys %{$sync_obj}) {
                 if( not $ignore_attr{$attr_name} ) {
                     if( not defined($db_obj->{$attr_name}) ) {
@@ -135,11 +158,23 @@ sub sync_contained_objects
         else {
             # add object
             my $new_obj = {};
-            foreach my $attr_name (keys %{$sync_obj}) {
-                $new_obj->{$attr_name} = $sync_obj->{$attr_name};
-            }
-            $new_obj->{'spsid.object.container'} = $container;
             
+            foreach my $attr_name (keys %{$sync_obj}) {
+                if( not $ignore_attr{$attr_name} )
+                {
+                    $new_obj->{$attr_name} = $sync_obj->{$attr_name};
+                }
+            }
+
+            if( scalar(keys %def_auto_attr) > 0 )
+            {
+                $new_obj =
+                    $self->client->new_object_default_attrs
+                        ($container, $objclass, $new_obj);
+            }
+
+            $new_obj->{'spsid.object.container'} = $container;
+
             push(@add_objects, $new_obj);
         }
     }
