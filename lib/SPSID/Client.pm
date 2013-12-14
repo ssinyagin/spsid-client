@@ -111,7 +111,8 @@ sub new_from_urlparams
     my $uri = URI->new($url);
     die('Cannot parse URL: ' . $url) unless defined $uri;
 
-    my $ua = LWP::UserAgent->new(keep_alive => 1);
+    my $ua = LWP::UserAgent->new(keep_alive => 1,
+                                 ssl_opts => { verify_hostname => 0 });
     $ua->timeout(10);
     $ua->env_proxy;
 
