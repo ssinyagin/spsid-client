@@ -4,7 +4,7 @@ package SPSID::Client;
 
 use utf8;
 use JSON;
-use LWP::UserAgent;
+use LWP::UserAgent::Determined;
 use HTTP::Request;
 use URI;
 use Getopt::Long;
@@ -23,6 +23,7 @@ has 'ua' =>
     (
      is  => 'rw',
      isa => 'Object',
+     required => 1,
     );
 
 has _next_id => (
@@ -36,20 +37,6 @@ has _next_id => (
 );
 
 
-
-sub BUILD
-{
-    my $self = shift;
-
-    if( not defined($self->ua) ) {
-        my $ua = LWP::UserAgent->new;
-        $ua->timeout(10);
-        $ua->env_proxy;
-        $self->ua($ua);
-    }
-    
-    return;
-}
 
 
 sub new_from_getopt
@@ -111,10 +98,16 @@ sub new_from_urlparams
     my $uri = URI->new($url);
     die('Cannot parse URL: ' . $url) unless defined $uri;
 
-    my $ua = LWP::UserAgent->new(keep_alive => 1,
-                                 ssl_opts => { verify_hostname => 0 });
+    my $ua = LWP::UserAgent::Determined->new
+        (keep_alive => 1,
+         ssl_opts => { verify_hostname => 0 });
     $ua->timeout(10);
     $ua->env_proxy;
+    # retry in case of failures.
+    $ua->timing('1,2');
+    # "401 Authorization Required" is caused sometimes by cached connections
+    my $http_codes_hr = $ua->codes_to_determinate();
+    $http_codes_hr->{401} = 1;
 
     if( defined($realm) or defined($username) or defined($password) ) {
         if( defined($realm) and defined($username) and defined($password) ) {
