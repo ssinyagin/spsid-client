@@ -105,9 +105,6 @@ sub new_from_urlparams
     $ua->env_proxy;
     # retry in case of failures.
     $ua->timing('1,2');
-    # "401 Authorization Required" is caused sometimes by cached connections
-    my $http_codes_hr = $ua->codes_to_determinate();
-    $http_codes_hr->{401} = 1;
 
     if( defined($realm) or defined($username) or defined($password) ) {
         if( defined($realm) and defined($username) and defined($password) ) {
