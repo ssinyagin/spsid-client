@@ -29,14 +29,15 @@ sub print_usage
          "  --class=CLASS         Object class\n",
          "  --container=ID        Optional container ID\n",
          "  --attr=NAME:VALUE     Optional search criteria\n",
-         "  --prefix=NAME:SUBSTR  Optional search criteria\n",
-         "  --prefix=:SUBSTR      Search by any attribute\n",
+         "  --prefix=NAME:STRING  Optional search criteria\n",
+         "  --prefix=:STRING      Prefix search by any attribute\n",
+         "  --fulltext=STRING     Full-text substring search\n",
          "\n");
     print STDERR SPSID::Client->cli_env_vars();
     print STDERR
         ("This program searches SPSID objects. Without container, all\n",
          "matching objects are returned. Either exact match, or\n",
-         "case-insensoiotive prefix search can narrow down the results\n");
+         "case-insensitive prefix search can narrow down the results\n");
 };
 
 my $client;
@@ -55,18 +56,22 @@ try {
 my $objclass;
 my $container;
 my @attrfilters;
-my $prefix;
+my $search_prefix;
+my $fulltext_search;
 
 my $ok =  GetOptions
     ('class=s' => \$objclass,
      'container=s' => \$container,
      'attr=s' => \@attrfilters,
-     'prefix=s' => \$prefix,
+     'prefix=s' => \$search_prefix,
+     'fulltext=s' => \$fulltext_search,
     );
 
 
 if( not $ok or not defined($objclass) or scalar(@ARGV) > 0 or
-    (scalar(@attrfilters) > 0 and defined($prefix)) ) {
+    ((scalar(@attrfilters) > 0) +
+     defined($search_prefix) +
+     defined($fulltext_search) > 1) ) {
     print_usage();
     exit(1);
 };
@@ -74,22 +79,27 @@ if( not $ok or not defined($objclass) or scalar(@ARGV) > 0 or
     
 my $result;
 
-if( defined($prefix) ) {
+if( defined($search_prefix) ) {
 
-    utf8::decode($prefix);
+    utf8::decode($search_prefix);
     
-    if( $prefix =~ /^([a-z0-9._]+):(.+)/ ) {
+    if( $search_prefix =~ /^([a-z0-9._]+):(.+)/ ) {
         $result = $client->search_prefix($objclass, $1, $2);
     }
-    elsif( $prefix =~ /^:(.+)/ ) {
+    elsif( $search_prefix =~ /^:(.+)/ ) {
         $result = $client->search_prefix($objclass, undef, $1);
     }
     else {        
-        print STDERR "Invalid syntax for the prefix: $prefix\n";
+        print STDERR "Invalid syntax for the prefix: $search_prefix\n";
         print_usage();
         exit(1);
     }
-
+}
+elsif( defined($fulltext_search) ) {
+    
+    utf8::decode($fulltext_search);
+    $result = $client->search_fulltext($objclass, $fulltext_search);
+    
 }
 else {
     my @args = ($container, $objclass);

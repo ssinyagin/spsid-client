@@ -274,6 +274,18 @@ sub search_prefix
 }
 
 
+sub search_fulltext
+{
+    my $self = shift;
+    my $objclass = shift;
+    my $search_string = shift;
+
+    return $self->_call('search_fulltext',
+                        {'objclass' => $objclass,
+                         'search_string' => $search_string});
+}
+
+
 sub contained_classes
 {
     my $self = shift;
