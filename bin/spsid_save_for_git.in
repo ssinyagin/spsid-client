@@ -1,0 +1,162 @@
+#!@PERL@
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use Try::Tiny;
+use IO::File;
+use JSON;
+
+BEGIN {
+    if( defined($ENV{'SPSID_PERLLIBDIRS'}) ) {
+        unshift(@INC, split(/,/, $ENV{'SPSID_PERLLIBDIRS'}));
+    }
+    else {
+        unshift(@INC, split(/,/, @perllibdirs@));
+    }
+}
+
+use SPSID::Client;
+
+
+sub print_usage {
+    print STDERR ('Usage: ' . $0 . ' --dir=DIR [options...]' . "\n",
+                  SPSID::Client->getopt_help_string(),
+                  "  --dir=DIR      Output directory\n",
+                  "\n");
+    print STDERR SPSID::Client->cli_env_vars();
+    print STDERR ("This program exports all SPSID objects into plain text\n" .
+                  "files suitable for Git checkin\n");
+};
+
+
+my $client;
+
+try {
+    $client = SPSID::Client->new_from_getopt();
+}
+    catch {
+        print STDERR "Error: " . $_ . "\n";
+        print_usage();
+        exit(1);
+    };
+
+
+my $dir;
+
+my $ok =  GetOptions('dir=s' => \$dir);
+
+if( not $ok or not $dir or scalar(@ARGV) > 0 ) {
+    print_usage();
+    exit(1);
+};
+
+if( not -d $dir )
+{
+    print STDERR "No such directory: $dir\n";
+    exit(1);
+}
+
+
+$| = 1;
+
+my $c_objects = 0;
+my @top_objects;
+
+export_contained_objects('NIL');
+
+{
+    my $topfile = IO::File->new($dir . '/TOP', "w");
+    die("Cannot open $topfile for writing: $!") unless $topfile;
+
+    my $json = JSON->new();
+    $json->pretty();
+    
+    $topfile->print($json->encode([sort @top_objects]));
+    $topfile->close();
+}
+    
+
+printf("\nExported %d objects\n", $c_objects);
+
+exit(0);
+
+
+
+sub export_contained_objects
+{
+    my $container = shift;
+
+    my $ret = [];
+    
+    # recursively retrieve and export all contained objects
+
+    foreach my $objclass ( @{$client->contained_classes($container)} ) {
+        foreach my $obj ( @{$client->search_objects($container, $objclass)} ) {
+
+            my $id = $obj->{'spsid.object.id'};
+            if( $container eq 'NIL' )
+            {
+                push(@top_objects, $id);
+            }
+            
+            export_object($obj);
+
+            print ".";
+            $c_objects++;
+            
+            export_contained_objects($id);
+        }
+    }
+
+    return $ret;
+}
+
+
+sub export_object
+{
+    my $obj = shift;
+    my $id = $obj->{'spsid.object.id'};
+
+    my $data = {'attr' => $obj, 'log' => []};
+
+    my $log = $client->get_object_log($id);
+
+    foreach my $logentry (@{$log})
+    {
+        push(@{$data->{'log'}},
+             {'time' => $logentry->{'time'},
+              'timestring' => scalar(localtime($logentry->{'time'}/1000)),
+              'user' => $logentry->{'user'},
+              'msg' => $logentry->{'msg'}});
+    }
+    
+    my $outfile = IO::File->new($dir . '/' . $id, "w");
+    die("Cannot open $outfile for writing: $!") unless $outfile;
+
+    my $json = JSON->new();
+    $json->pretty();
+    $json->utf8();
+    $json->canonical();
+
+    $outfile->print($json->encode($data));
+    $outfile->close();
+}
+
+
+
+
+
+    
+
+
+# Local Variables:
+# mode: cperl
+# indent-tabs-mode: nil
+# cperl-indent-level: 4
+# cperl-continued-statement-offset: 4
+# cperl-continued-brace-offset: -4
+# cperl-brace-offset: 0
+# cperl-label-offset: -2
+# End:
