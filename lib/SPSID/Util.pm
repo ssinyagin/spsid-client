@@ -59,7 +59,7 @@ sub sync_contained_objects
     
     my %db_uniqref;
     foreach my $obj (@{$db_objects}) {
-        my $key = $obj->{$key_attr};
+        my $key = lc($obj->{$key_attr});
         $db_uniqref{$key} = $obj;
     }
 
@@ -74,7 +74,7 @@ sub sync_contained_objects
     
     my %sync_uniqref;
     foreach my $obj (@{$sync_objects}) {
-        my $key = $obj->{$key_attr};
+        my $key = lc($obj->{$key_attr});
         if( not defined($key) ) {
             die('Mandatory unique attribute ' . $key_attr . ' is missing in ' .
                 'a sync object');
