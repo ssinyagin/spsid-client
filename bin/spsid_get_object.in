@@ -1,0 +1,83 @@
+#!@PERL@
+
+use strict;
+use warnings;
+
+use utf8;
+use Getopt::Long;
+use Try::Tiny;
+use JSON;
+
+BEGIN {
+    if( defined($ENV{'SPSID_PERLLIBDIRS'}) ) {
+        unshift(@INC, split(/,/, $ENV{'SPSID_PERLLIBDIRS'}));
+    }
+    else {
+        unshift(@INC, split(/,/, @perllibdirs@));
+    }
+}
+
+use SPSID::Client;
+
+$| = 1;
+
+sub print_usage
+{
+    print STDERR
+        ('Usage: ' . $0 . ' --id=ID [options...]' . "\n",
+         SPSID::Client->getopt_help_string(),
+         "  --id=ID               Object ID\n",
+         "\n");
+    print STDERR SPSID::Client->cli_env_vars();
+    print STDERR
+        ("This program searches SPSID objects. Without container, all\n",
+         "matching objects are returned. Either exact match, or\n",
+         "case-insensitive prefix search can narrow down the results\n");
+};
+
+my $client;
+
+try {
+    $client = SPSID::Client->new_from_getopt();
+}
+    catch {
+        print STDERR "Error: " . $_ . "\n";
+        print_usage();
+        exit(1);
+    };
+
+
+
+my $objid;
+
+my $ok =  GetOptions
+    ('id=s' => \$objid,
+    );
+
+
+if( not $ok or not defined($objid) or scalar(@ARGV) > 0 ) {
+    print_usage();
+    exit(1);
+};
+
+    
+my $result = $client->get_object($objid);
+
+
+binmode(STDOUT);
+my $json = JSON->new->utf8(1)->pretty(1);
+print $json->encode($result);
+
+
+exit(0);
+
+
+# Local Variables:
+# mode: cperl
+# indent-tabs-mode: nil
+# cperl-indent-level: 4
+# cperl-continued-statement-offset: 4
+# cperl-continued-brace-offset: -4
+# cperl-brace-offset: 0
+# cperl-label-offset: -2
+# End:

@@ -20,6 +20,7 @@ SUBST = @abs_top_builddir@/setup_tools/substvars.sh
 
 bin_SCRIPTS = \
 	spsid_delete_object \
+	spsid_get_object \
 	spsid_recalc \
 	spsid_save_for_git \
 	spsid_search \
@@ -31,6 +32,7 @@ CLEANFILES = $(bin_SCRIPTS)
 
 EXTRA_DIST = \
 	spsid_delete_object.in \
+	spsid_get_object.in \
 	spsid_recalc.in \
 	spsid_save_for_git.in \
 	spsid_search.in \
@@ -41,6 +43,9 @@ EXTRA_DIST = \
 
 spsid_delete_object: spsid_delete_object.in
 	$(SUBST) spsid_delete_object.in > spsid_delete_object
+
+spsid_get_object: spsid_get_object.in
+	$(SUBST) spsid_get_object.in > spsid_get_object
 
 spsid_recalc: spsid_recalc.in
 	$(SUBST) spsid_recalc.in > spsid_recalc
