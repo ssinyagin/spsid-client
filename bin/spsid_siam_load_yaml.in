@@ -21,7 +21,7 @@ use SPSID::Client;
 
 
 sub print_usage {
-    print STDERR ('Usage: ' . $0 . ' --url=URL --in=FILE [options...]' . "\n",
+    print STDERR ('Usage: ' . $0 . ' --in=FILE [options...]' . "\n",
                   SPSID::Client->getopt_help_string(),
                   "  --in=FILE      YAML file for import\n",
                   "\n");

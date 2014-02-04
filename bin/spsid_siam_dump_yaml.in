@@ -21,7 +21,7 @@ use SPSID::Client;
 
 
 sub print_usage {
-    print STDERR ('Usage: ' . $0 . ' --url=URL [options...]' . "\n",
+    print STDERR ('Usage: ' . $0 . ' [options...]' . "\n",
                   SPSID::Client->getopt_help_string(),
                   "\n");
     print STDERR SPSID::Client->cli_env_vars();

@@ -24,7 +24,7 @@ $| = 1;
 sub print_usage
 {
     print STDERR
-        ('Usage: ' . $0 . ' --url=URL --class=CLASS [options...]' . "\n",
+        ('Usage: ' . $0 . ' --class=CLASS [options...]' . "\n",
          SPSID::Client->getopt_help_string(),
          "  --class=CLASS         Object class\n",
          "  --container=ID        Optional container ID\n",

@@ -48,20 +48,20 @@ try {
 
 
 
-my $objid;
+my $id;
 
 my $ok =  GetOptions
-    ('id=s' => \$objid,
+    ('id=s' => \$id,
     );
 
 
-if( not $ok or not defined($objid) or scalar(@ARGV) > 0 ) {
+if( not $ok or not defined($id) or scalar(@ARGV) > 0 ) {
     print_usage();
     exit(1);
 };
 
     
-my $result = $client->get_object($objid);
+my $result = $client->get_object($id);
 
 
 binmode(STDOUT);
