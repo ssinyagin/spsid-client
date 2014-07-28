@@ -104,8 +104,8 @@ elsif( defined($fulltext_search) ) {
 else {
     my @args = ($container, $objclass);
 
-    if( scalar(@attrfilters) ) {
-
+    while( scalar(@attrfilters) ) {
+        
         my $pair = shift @attrfilters;
         
         if( $pair !~ /^([a-z0-9._]+):(.+)/ ) {
