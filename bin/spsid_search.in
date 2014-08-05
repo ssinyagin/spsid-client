@@ -121,7 +121,7 @@ else {
 }
 
 binmode(STDOUT);
-my $json = JSON->new->utf8(1)->pretty(1);
+my $json = JSON->new->utf8(1)->pretty(1)->canonical(1);
 print $json->encode($result);
 
 
