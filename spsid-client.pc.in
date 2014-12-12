@@ -1,0 +1,6 @@
+perllibdir=@perllibdir@
+bindir=@bindir@
+
+Name: spsid-client
+Description: The client libraries and utilities for spsid-server
+Version: @VERSION@

@@ -29,7 +29,6 @@ AC_PATH_PROG(RM, rm, no)
 AC_PATH_PROG(RMDIR, rmdir, no)
 AC_PATH_PROG(FIND, find, no)
 
-
 AC_ARG_ENABLE(pkgonly,
         [AC_HELP_STRING([--enable-pkgonly],
                         [Skip all checking])])
@@ -78,7 +77,13 @@ if test -z "$mansec_misc"; then
 AC_ARG_VAR(perllibdir,  [[LIBDIR/PACKAGE/perl] SPSID Perl libraries])
 if test -z "$perllibdir"; then
    perllibdir='${libdir}/${PACKAGE}/perl'; fi
-   
+
+
+AC_ARG_VAR(pkgconfigdir,  [[DATAROOTDIR/pkgconfig] pkg-config directory])
+if test -z "$pkgconfigdir"; then
+   pkgconfigdir='${datarootdir}/pkgconfig'; fi
+
+
 AC_CONFIG_FILES([Makefile bin/Makefile])
 AC_CONFIG_FILES([lib/Makefile])
 AC_CONFIG_FILES([setup_tools/substvars.sh],[chmod +x setup_tools/substvars.sh])

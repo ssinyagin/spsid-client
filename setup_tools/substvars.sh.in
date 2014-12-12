@@ -33,8 +33,6 @@ spsid_config_pl=@pkgdatadir@/conf_defaults/spsid_config.pl
 @SED@ \
     -e "s,\@PERL\@,@PERL@,g" \
     -e "s,\@SHELL\@,@SHELL@,g" \
-    -e "s,\@TELNET\@,@TELNET@,g" \
-    -e "s,\@SSH\@,@SSH@,g" \
     -e "s,\@VERSION\@,@VERSION@,g" \
     -e "s,\@bindir\@,@bindir@,g" \
     -e "s,\@mandir\@,@mandir@,g" \
@@ -45,8 +43,6 @@ spsid_config_pl=@pkgdatadir@/conf_defaults/spsid_config.pl
     -e "s,\@pkgdatadir\@,@pkgdatadir@,g" \
     -e "s,\@plugconfdir\@,@plugconfdir@,g" \
     -e "s,\@siteconfdir\@,@siteconfdir@,g" \
-    -e "s,\@spsid_config_pl\@,${spsid_config_pl},g" \
-    -e "s,\@PLACKUP\@,@PLACKUP@,g" \
     $1
 
 # Local Variables:

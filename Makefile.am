@@ -18,7 +18,16 @@
 
 SUBDIRS = . bin lib
 
-EXTRA_DIST = 
+SUBST = @abs_top_builddir@/setup_tools/substvars.sh
+
+EXTRA_DIST = spsid-client.pc.in
+
+pkgconf_DATA = spsid-client.pc
+pkgconfdir = @pkgconfigdir@
+
+spsid-client.pc: spsid-client.pc.in
+	$(SUBST) spsid-client.pc.in > spsid-client.pc
+
 
 
 dist-hook:

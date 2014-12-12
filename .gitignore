@@ -9,6 +9,9 @@ config.status
 configure
 configure.lineno
 spsid-*.tar.gz
+
+spsid-client.pc
+
 setup_tools/substvars.sh
 share/conf_defaults/spsid_config.pl
 share/psgi/spsid_jsonrpc.fcgi
