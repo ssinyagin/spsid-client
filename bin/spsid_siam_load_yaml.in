@@ -180,7 +180,8 @@ sub import_object
         }
     }
 
-    if( not defined($attr->{'siam.object.complete'}) ) {
+    if( not defined($attr->{'siam.object.complete'}) and
+        index($objclass, 'SIAM::') == 0 ) {
         $attr->{'siam.object.complete'} = 1;
     }    
 
