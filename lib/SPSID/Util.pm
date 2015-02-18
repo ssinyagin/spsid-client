@@ -18,48 +18,56 @@ sub sync_contained_objects
     my $container = shift;
     my $objclass = shift;
     my $sync_objects = shift;
+    my $key_attrs = shift;
 
     my $schema = $self->client->get_schema();
     if( not defined($schema->{$objclass}) ) {
         die('The schema does not contain class ' . $objclass);
     }
-
+    
     if( not defined($schema->{$objclass}{'attr'}) ) {
         die('The schema for ' . $objclass . ' does not have "attr" map');
     }
-
-    my $attr_schema = $schema->{$objclass}{'attr'};
-    my @unique_mandatory_attr;
     
-    foreach my $attr_name (keys %{$attr_schema}) {
-        if( $attr_schema->{$attr_name}{'mandatory'}
-            and
-            (
-             $attr_schema->{$attr_name}{'unique'}
-             or
-             $attr_schema->{$attr_name}{'unique_child'}
-            )
-            and
-            not $attr_schema->{$attr_name}{'default_autogen'} )
-        {
-            push(@unique_mandatory_attr, $attr_name);
+    my $attr_schema = $schema->{$objclass}{'attr'};
+    
+    if( not defined($key_attrs) )
+    {
+        my @unique_mandatory_attr;
+    
+        foreach my $attr_name (sort keys %{$attr_schema}) {
+            if( $attr_schema->{$attr_name}{'mandatory'}
+                and
+                (
+                 $attr_schema->{$attr_name}{'unique'}
+                 or
+                 $attr_schema->{$attr_name}{'unique_child'}
+                )
+                and
+                not $attr_schema->{$attr_name}{'default_autogen'} )
+            {
+                push(@unique_mandatory_attr, $attr_name);
+            }
         }
-    }
-            
-    if( scalar(@unique_mandatory_attr) == 0 ) {
-        die('The schema for ' . $objclass .
-            ' does not have any unique+mandatory attributes');
-    }    
+        
+        if( scalar(@unique_mandatory_attr) == 0 ) {
+            die('The schema for ' . $objclass .
+                ' does not have any unique+mandatory attributes');
+        }
 
-    my $key_attr = $unique_mandatory_attr[0];
+        $key_attrs = [ $unique_mandatory_attr[0] ];
+    }        
 
     my $db_objects = $self->client->search_objects($container, $objclass);
 
-    # index objects by key attribute
+    # index objects by key attributes
     
     my %db_uniqref;
     foreach my $obj (@{$db_objects}) {
-        my $key = lc($obj->{$key_attr});
+        my $key = '';
+        foreach my $key_attr (@{$key_attrs}) {
+            $key .= lc($obj->{$key_attr}) . '%%%%%';
+        }
         $db_uniqref{$key} = $obj;
     }
 
@@ -74,15 +82,19 @@ sub sync_contained_objects
     
     my %sync_uniqref;
     foreach my $obj (@{$sync_objects}) {
-        my $key = lc($obj->{$key_attr});
-        if( not defined($key) ) {
-            die('Mandatory unique attribute ' . $key_attr . ' is missing in ' .
-                'a sync object');
-        }
+        my $key;
+        foreach my $key_attr (@{$key_attrs}) {
+            if( not defined($obj->{$key_attr}) ) {
+                die('Key attribute ' . $key_attr . ' is missing in ' .
+                    'a sync object');
+            }
 
+            $key .= lc($obj->{$key_attr}) . '%%%%%';
+        }
+        
         if( defined($sync_uniqref{$key}) ) {
-            die('Unique attribute ' . $key_attr . ' has a duplicate value ' .
-                $key . ' in sync objects');
+            die('Key attributes [' . join(',', @{$key_attrs}) .
+                '] havea duplicate value ' . $key . ' in sync objects');
         }
         $sync_uniqref{$key} = $obj;
     }
