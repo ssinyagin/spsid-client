@@ -30,9 +30,8 @@ sub print_usage
          "\n");
     print STDERR SPSID::Client->cli_env_vars();
     print STDERR
-        ("This program searches SPSID objects. Without container, all\n",
-         "matching objects are returned. Either exact match, or\n",
-         "case-insensitive prefix search can narrow down the results\n");
+        ("This program retrieves an SPSID object and optionally shows\n",
+         "its change log\n");
 };
 
 my $client;
@@ -49,9 +48,11 @@ try {
 
 
 my $id;
+my $showlog;
 
 my $ok =  GetOptions
     ('id=s' => \$id,
+     'log'  => \$showlog,
     );
 
 
@@ -63,9 +64,15 @@ if( not $ok or not defined($id) or scalar(@ARGV) > 0 ) {
     
 my $result = $client->get_object($id);
 
+if( $showlog )
+{
+    $result->{'__LOG__'} =
+        $client->get_object_log($id);
+}
+
 
 binmode(STDOUT);
-my $json = JSON->new->utf8(1)->pretty(1);
+my $json = JSON->new->utf8(1)->pretty(1)->canonical(1);
 print $json->encode($result);
 
 

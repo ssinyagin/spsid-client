@@ -230,6 +230,24 @@ sub get_object
     return $self->_call('get_object', {'id' => $id});
 }
 
+
+sub add_application_log
+{
+    my $self = shift;
+    my $id = shift;
+    my $app = shift;
+    my $userid = shift;
+    my $msg = shift;
+    
+    $self->_call('add_application_log',
+                 {'id' => $id,
+                  'application' => $app,
+                  'userid' => $userid,
+                  'message' => $msg});
+    return;
+}
+
+
 sub get_object_log
 {
     my $self = shift;
