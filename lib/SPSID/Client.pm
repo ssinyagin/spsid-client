@@ -174,7 +174,22 @@ sub _call
 }
 
 
+# public interface for _call()
+sub call
+{
+    my $self = shift;
+    my $method = shift;
+    my $params = shift;
 
+    if( not defined($method) or $method eq '' )
+    {
+        die('Method is undefined or empty');
+    }
+
+    $params = {} unless defined($params);
+    
+    return $self->_call($method, $params);
+}
 
 
 sub create_object
