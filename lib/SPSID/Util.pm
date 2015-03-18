@@ -11,6 +11,12 @@ has 'client' =>
      required => 1,
     );
 
+has 'schema' =>
+    (
+     is  => 'rw',
+     isa => 'HashRef',
+    );
+
 
 sub sync_contained_objects
 {
@@ -19,8 +25,14 @@ sub sync_contained_objects
     my $objclass = shift;
     my $sync_objects = shift;
     my $key_attrs = shift;
-
-    my $schema = $self->client->get_schema();
+    
+    my $schema = $self->schema;
+    if( not defined($schema) )
+    {
+        $schema = $self->client->get_schema();
+        $self->schema($schema);
+    }
+    
     if( not defined($schema->{$objclass}) ) {
         die('The schema does not contain class ' . $objclass);
     }
