@@ -448,6 +448,32 @@ sub set_condition
             $handled = 1;
         }
     }
+    elsif( $class eq 'SIAM::DeviceComponent' )
+    {
+        if( $key eq 'siam.devc.link_svcc' )
+        {
+            my $r = $self->client->search_objects
+                (undef, 'SIAM::ServiceComponent',
+                 'siam.svcc.inventory_id', $value);
+            
+            if( scalar(@{$r}) == 0 )
+            {
+                $self->error
+                    ('Condition ' . $key .
+                     ' failed to apply: cannot find SIAM::ServiceComponent ' .
+                     'with siam.svcc.inventory_id=' . $value);
+                return;
+            }
+            
+            $self->client->modify_object
+                ($r->[0]{'spsid.object.id'},
+                 {'siam.svcc.devc_id' => $id});
+            
+            $handled = 1;
+        }
+    
+    }
+            
 
     if( not $handled )
     {
