@@ -467,7 +467,8 @@ sub set_condition
             
             $self->client->modify_object
                 ($r->[0]{'spsid.object.id'},
-                 {'siam.svcc.devc_id' => $id});
+                 {'siam.svcc.devc_id' => $id,
+                  'siam.object.complete' => 1});
             
             $handled = 1;
         }
