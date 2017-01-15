@@ -8,6 +8,7 @@ use LWP::UserAgent::Determined;
 use HTTP::Request;
 use URI;
 use Getopt::Long;
+use Carp;
 
 use Moose;
 
@@ -52,10 +53,10 @@ sub new_from_getopt
                            'realm=s' => \$realm,
                            'user=s'  => \$username,
                            'pw=s'    => \$password) ) {
-        die('Cannot parse command-line options');
+        croak('Cannot parse command-line options');
     }
 
-    die("--url option is required\n") unless defined($url);
+    croak("--url option is required\n") unless defined($url);
 
     return SPSID::Client->new_from_urlparams
         ({'url' => $url,
@@ -96,7 +97,7 @@ sub new_from_urlparams
     my $password = $params->{'password'};
 
     my $uri = URI->new($url);
-    die('Cannot parse URL: ' . $url) unless defined $uri;
+    croak('Cannot parse URL: ' . $url) unless defined $uri;
 
     my $ua = LWP::UserAgent::Determined->new
         (keep_alive => 1,
@@ -111,7 +112,7 @@ sub new_from_urlparams
             $ua->credentials($uri->host_port, $realm, $username, $password);
         }
         else {
-            die('Realm, user, and password are required at the same time');
+            croak('Realm, user, and password are required at the same time');
         }
     }
 
@@ -151,13 +152,13 @@ sub _call
     if( $response->is_success ) {
         my $content = $response->decoded_content;
         my $result = decode_json($content);
-        die('Cannot parse responce') unless defined($result);
+        croak('Cannot parse responce') unless defined($result);
         
-        die('Missing version 2.0 in RPC response') unless
+        croak('Missing version 2.0 in RPC response') unless
             (defined($result->{'jsonrpc'}) and $result->{'jsonrpc'} eq '2.0');
         
         if( defined($result->{'error'}) ) {            
-            die(&{$rpc_error_msg}($result));
+            croak(&{$rpc_error_msg}($result));
         }
 
         return $result->{'result'};
@@ -166,10 +167,10 @@ sub _call
     my $err_result;
     eval {$err_result = decode_json($response->decoded_content) };
     if( defined($err_result) and defined($err_result->{'error'}) ){
-        die(&{$rpc_error_msg}($err_result));
+        croak(&{$rpc_error_msg}($err_result));
     }
     else {
-        die('HTTP error:' . $response->status_line);
+        croak('HTTP error:' . $response->status_line);
     }
 }
 
@@ -183,7 +184,7 @@ sub call
 
     if( not defined($method) or $method eq '' )
     {
-        die('Method is undefined or empty');
+        croak('Method is undefined or empty');
     }
 
     $params = {} unless defined($params);
@@ -375,15 +376,15 @@ sub ping
     my $self = shift;
 
     my $v = $self->_call('server_version');
-    die('Server did not return its version')
+    croak('Server did not return its version')
         unless (defined($v) and $v > 0);
 
     if( $v < 1.0 ) {
-        die('Server version is incompatible with the client');
+        croak('Server version is incompatible with the client');
     }
     
     my $r = $self->_call('ping', {'echo' => 'blahblah'});
-    die('Ping RPC call returned wrong response')
+    croak('Ping RPC call returned wrong response')
         unless ($r->{'echo'} eq 'blahblah');
     return;
 }
