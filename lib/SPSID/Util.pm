@@ -97,8 +97,16 @@ sub sync_contained_objects
         my $key;
         foreach my $key_attr (@{$key_attrs}) {
             if( not defined($obj->{$key_attr}) ) {
-                die('Key attribute ' . $key_attr . ' is missing in ' .
-                    'a sync object');
+                if( defined($attr_schema->{$key_attr}{'default'}) )
+                {
+                    $obj->{$key_attr} =
+                        $attr_schema->{$key_attr}{'default'};
+                }
+                else
+                {
+                    die('Key attribute ' . $key_attr . ' is missing in ' .
+                        'a sync object and there is no default value');
+                }
             }
 
             $key .= lc($obj->{$key_attr}) . '%%%%%';
@@ -106,7 +114,7 @@ sub sync_contained_objects
         
         if( defined($sync_uniqref{$key}) ) {
             die('Key attributes [' . join(',', @{$key_attrs}) .
-                '] havea duplicate value ' . $key . ' in sync objects');
+                '] have a duplicate value ' . $key . ' in sync objects');
         }
         $sync_uniqref{$key} = $obj;
     }
