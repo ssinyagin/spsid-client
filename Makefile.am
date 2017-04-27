@@ -25,6 +25,9 @@ EXTRA_DIST = spsid-client.pc.in
 pkgconf_DATA = spsid-client.pc
 pkgconfdir = @pkgconfigdir@
 
+
+CLEANFILES = $(pkgconf_DATA)
+
 spsid-client.pc: spsid-client.pc.in
 	$(SUBST) spsid-client.pc.in > spsid-client.pc
 
