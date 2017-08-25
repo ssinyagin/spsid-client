@@ -317,6 +317,17 @@ sub search_fulltext
 }
 
 
+sub get_attr_values
+{
+    my $self = shift;
+    my $objclass = shift;
+    my $attr_name = shift;
+
+    return $self->_call('get_attr_values', {'objclass' => $objclass,
+                                            'attr_name' => $attr_name});
+}
+
+
 sub contained_classes
 {
     my $self = shift;
