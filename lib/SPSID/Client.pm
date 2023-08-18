@@ -102,7 +102,7 @@ sub new_from_urlparams
     my $ua = LWP::UserAgent::Determined->new
         (keep_alive => 1,
          ssl_opts => { verify_hostname => 0 });
-    $ua->timeout(10);
+    $ua->timeout(100);
     $ua->env_proxy;
     # retry in case of failures.
     $ua->timing('1,2');
