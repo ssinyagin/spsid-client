@@ -273,6 +273,22 @@ sub get_object_log
 }
 
 
+sub get_last_change_id
+{
+    my $self = shift;
+    return $self->_call('get_last_change_id', {});
+}
+
+
+sub get_last_changes
+{
+    my $self = shift;
+    my $start_id = shift;
+    my $max_rows = shift;
+    return $self->_call('get_last_changes', {'start_id' => $start_id, 'max_rows' => $max_rows});
+}
+
+
 # input: attribute names and values for AND condition
 # output: arrayref of objects found
 
