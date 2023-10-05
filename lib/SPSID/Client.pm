@@ -103,7 +103,6 @@ sub new_from_urlparams
         (keep_alive => 1,
          ssl_opts => { verify_hostname => 0 });
     $ua->timeout(100);
-    $ua->env_proxy;
     # retry in case of failures.
     $ua->timing('1,2');
 
