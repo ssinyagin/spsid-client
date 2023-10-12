@@ -222,7 +222,6 @@ sub modify_object
 sub modify_multiple_objects
 {
     my $self = shift;
-    my $id = shift;
     my $mod = shift;
 
     $self->_call('modify_multiple_objects', {'mod' => $mod});
