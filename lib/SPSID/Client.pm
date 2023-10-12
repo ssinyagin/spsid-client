@@ -19,7 +19,7 @@ has 'url' =>
      isa => 'Str',
      required => 1,
     );
-    
+
 has 'ua' =>
     (
      is  => 'rw',
@@ -83,8 +83,8 @@ sub cli_env_vars
                 "   SPSID_URL, SPSID_REALM, SPSID_USER, SPSID_PW",
                 "", "");
 }
-    
-    
+
+
 
 sub new_from_urlparams
 {
@@ -116,7 +116,7 @@ sub new_from_urlparams
     }
 
     return SPSID::Client->new('url' => $url, 'ua' => $ua);
-}    
+}
 
 
 sub _call
@@ -125,7 +125,7 @@ sub _call
     my $method = shift;
     my $params = shift;
 
-    my $req = HTTP::Request->new( 'POST', $self->url );    
+    my $req = HTTP::Request->new( 'POST', $self->url );
     $req->header( 'Content-Type' => 'application/json' );
 
     my $json = JSON->new->utf8(1);
@@ -135,7 +135,7 @@ sub _call
             'id'      => $self->_next_id->(),
             'method'  => $method,
             'params'  => $params}));
-    
+
     my $response = $self->ua->request($req);
 
     my $rpc_error_msg = sub {
@@ -147,16 +147,16 @@ sub _call
         }
         return $ret;
     };
-        
+
     if( $response->is_success ) {
         my $content = $response->decoded_content;
         my $result = decode_json($content);
         croak('Cannot parse responce') unless defined($result);
-        
+
         croak('Missing version 2.0 in RPC response') unless
             (defined($result->{'jsonrpc'}) and $result->{'jsonrpc'} eq '2.0');
-        
-        if( defined($result->{'error'}) ) {            
+
+        if( defined($result->{'error'}) ) {
             croak(&{$rpc_error_msg}($result));
         }
 
@@ -187,7 +187,7 @@ sub call
     }
 
     $params = {} unless defined($params);
-    
+
     return $self->_call($method, $params);
 }
 
@@ -211,18 +211,31 @@ sub modify_object
     my $self = shift;
     my $id = shift;
     my $mod_attr = shift;
-    
+
     $self->_call('modify_object', {'id' => $id,
                                    'mod_attr' => $mod_attr});
     return;
 }
+
+# atomically modify several objects
+
+sub modify_multiple_objects
+{
+    my $self = shift;
+    my $id = shift;
+    my $mod = shift;
+
+    $self->_call('modify_multiple_objects', {'mod' => $mod});
+    return;
+}
+
 
 
 sub validate_object
 {
     my $self = shift;
     my $attr = shift;
-    
+
     return $self->_call('validate_object', {'attr' => $attr});
 }
 
@@ -253,7 +266,7 @@ sub add_application_log
     my $app = shift;
     my $userid = shift;
     my $msg = shift;
-    
+
     $self->_call('add_application_log',
                  {'id' => $id,
                   'application' => $app,
@@ -302,7 +315,7 @@ sub search_objects
     if( scalar(@_) > 0 ) {
         $arg->{'search_attrs'} = [ @_ ];
     }
-        
+
     return $self->_call('search_objects', $arg);
 }
 
@@ -357,7 +370,7 @@ sub get_schema
     my $self = shift;
     return $self->_call('get_schema', {});
 }
-    
+
 
 sub new_object_default_attrs
 {
@@ -365,7 +378,7 @@ sub new_object_default_attrs
     my $container = shift;
     my $objclass = shift;
     my $templatekeys = shift;
-    
+
     return $self->_call('new_object_default_attrs',
                         {'container' => $container,
                          'objclass' => $objclass,
@@ -408,7 +421,7 @@ sub ping
     if( $v < 1.0 ) {
         croak('Server version is incompatible with the client');
     }
-    
+
     my $r = $self->_call('ping', {'echo' => 'blahblah'});
     croak('Ping RPC call returned wrong response')
         unless ($r->{'echo'} eq 'blahblah');
