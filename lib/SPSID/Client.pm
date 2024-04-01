@@ -300,6 +300,14 @@ sub get_last_changes
 }
 
 
+sub trim_log
+{
+    my $self = shift;
+    my $upto_id = shift;
+    return $self->_call('trim_log', {'upto_id' => $upto_id});
+}
+
+
 # input: attribute names and values for AND condition
 # output: arrayref of objects found
 
