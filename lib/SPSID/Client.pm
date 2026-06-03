@@ -414,6 +414,29 @@ sub get_siam_root
 
 
 
+sub create_datablob
+{
+    my $self = shift;
+    my $data = shift;
+    return $self->_call('create_datablob', {'data' => $data});
+}
+
+sub get_datablob
+{
+    my $self = shift;
+    my $id = shift;
+    return $self->_call('get_datablob', {'id' => $id});
+}
+
+sub modify_datablob
+{
+    my $self = shift;
+    my $id = shift;
+    my $data = shift;
+    return $self->_call('modify_datablob', {'id' => $id, 'data' => $data});
+}
+
+
 
 
 
